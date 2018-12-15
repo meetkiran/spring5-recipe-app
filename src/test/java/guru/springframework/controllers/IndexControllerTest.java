@@ -76,5 +76,11 @@ public class IndexControllerTest {
         Set<Recipe> setInController = argumentCaptor.getValue();
         assertEquals(2, setInController.size());
     }
-
+    @Test
+    public void testDeleteById() throws Exception{
+    	//given
+    	long idToDelete=Long.valueOf(2);
+    	//when
+    	recipeService.deleteRecipeCommand(idToDelete);
+    }
 }
