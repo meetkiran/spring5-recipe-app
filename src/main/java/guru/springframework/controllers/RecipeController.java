@@ -1,6 +1,7 @@
 package guru.springframework.controllers;
 
 import guru.springframework.commands.RecipeCommand;
+import guru.springframework.services.IngredientService;
 import guru.springframework.services.RecipeService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,6 +18,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class RecipeController {
 
     private final RecipeService recipeService;
+    
+    //private final IngredientService ingredientService;
 
     public RecipeController(RecipeService recipeService) {
         this.recipeService = recipeService;
@@ -50,6 +53,13 @@ public class RecipeController {
         model.addAttribute("recipe", recipeService.findCommandById(Long.valueOf(id)));
         return  "recipe/recipeform";
     }
+   /* @RequestMapping("recipe/{recipeId}/ingredient/{id}/update")
+    public String updateRecipeIngredient(@PathVariable String recipeId,@PathVariable String id, Model model){
+        model.addAttribute("recipe", ingredientService.findByRecipeIdAndIngredientId(Long.valueOf(recipeId,Long.valueOf(id))));
+        model.addAttribute("uomList", uomService.listAllUoms());
+        return  "recipe/ingredient/ingredientForm";
+    }*/
+    
 
     @PostMapping("recipe")
     public String saveOrUpdate(@ModelAttribute RecipeCommand command){
