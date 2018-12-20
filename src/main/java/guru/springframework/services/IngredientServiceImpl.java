@@ -72,14 +72,47 @@ public class IngredientServiceImpl implements IngredientService {
 				found.setUom(uomRepository.findById(ingredientCommand.getUom().getId())
 											.orElseThrow(()->new RuntimeException("uom not found")));
 			}else {
-				recipe.addIngredient(ingredientCommandToIngredient.convert(ingredientCommand));
+				Ingredient ingredient = ingredientCommandToIngredient.convert(ingredientCommand);
+				ingredient.setRecipe(recipe);
+				recipe.addIngredient(ingredient);
+			
 			}
 			Recipe savedRecipe = recipeRepository.save(recipe);
-			return ingredientToIngredientCommand.convert(savedRecipe.getIngredients().stream()
-									.filter(recipeIngredient->recipeIngredient.getId().equals(ingredientCommand.getId()))
-									.findFirst()
-									.get());
+			Optional<Ingredient>savedIngre = savedRecipe.getIngredients().stream().filter(recipeIngredient->recipeIngredient.getId().equals(ingredientCommand.getId()))
+					.findFirst()
+					;
+			if(!savedIngre.isPresent()) {
+				savedIngre = savedRecipe.getIngredients()
+						.stream()
+						.filter(recipeIngredient->recipeIngredient.getDescription().equals(ingredientCommand.getDescription()))
+						.filter(recipeIngredient->recipeIngredient.getAmount().equals(ingredientCommand.getAmount()))
+						.filter(recipeIngredient->recipeIngredient.getUom().equals(ingredientCommand.getUom()))
+						.findFirst();
+			}
+		return	ingredientToIngredientCommand.convert(savedIngre.get());
+									
+		
 		}
+	}
+
+	@Override
+	public void deleteByRecipeIdAndId(Long valueOf, Long valueOf2) {
+		Optional<Recipe> recipeOptional = recipeRepository.findById(valueOf);
+		if (!recipeOptional.isPresent()) {
+			log.debug("recuip-e not ofount");
+
+		}
+		Recipe recipe = recipeOptional.get();
+		Optional<Ingredient> ingredientCommandOptional = recipe.getIngredients().stream()
+				.filter(ingredient -> ingredient.getId().equals(valueOf2))
+				.findFirst();
+		if(ingredientCommandOptional.isPresent()) {
+			Ingredient in=ingredientCommandOptional.get();
+			in.setRecipe(null);
+			recipe.getIngredients().remove(ingredientCommandOptional.get());
+			recipeRepository.save(recipe);
+		}
+		return ;
 	}
 
 }

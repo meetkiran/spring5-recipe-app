@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import guru.springframework.commands.IngredientCommand;
+import guru.springframework.commands.RecipeCommand;
+import guru.springframework.commands.UnitOfMeasureCommand;
 import guru.springframework.services.IngredientService;
 import guru.springframework.services.RecipeService;
 import guru.springframework.services.UnitOfMeasureService;
@@ -50,6 +52,20 @@ public class IngredientController {
 		return "recipe/ingredient/ingredientform";
 	}
 	
+	@GetMapping
+	@RequestMapping("/recipe/{recipeId}/ingredient/new")
+	public String newRecipe(@PathVariable String recipeId, Model model) {
+		log.debug("creating new ingredient");
+		RecipeCommand recipeCommand = recipeService.findCommandById(Long.valueOf(recipeId));
+		IngredientCommand command = new IngredientCommand();
+		command.setRecipeId(Long.valueOf(recipeId));
+		
+		model.addAttribute("ingredient", command);
+		command.setUom(new UnitOfMeasureCommand());
+		model.addAttribute("uomList", this.unitofMeasureService.listAllUoms());
+		return "recipe/ingredient/ingredientform";
+	}
+	
 	
 	@PostMapping
 	@RequestMapping("recipe/{recipeId}/ingredient")
@@ -58,5 +74,13 @@ public class IngredientController {
 		IngredientCommand savedIngredient=ingredientService.saveIngredientCommand(ingredientCommand);
 		
 		return "redirect:/recipe/"+savedIngredient.getRecipeId()+"/ingredient/"+savedIngredient.getId()+"/show";
+	}
+	@PostMapping
+	@RequestMapping("recipe/{valueOf}/ingredient/{valueOf2}/delete")
+	public String deleteRecipeIngredient(@PathVariable String valueOf,@PathVariable String valueOf2) {
+		log.debug("delete info from ingreient ");
+		ingredientService.deleteByRecipeIdAndId(Long.valueOf(valueOf), Long.valueOf(valueOf2));
+		
+		return "redirect:/recipe/"+valueOf+"/ingredients";
 	}
 }
